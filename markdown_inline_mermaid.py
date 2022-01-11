@@ -74,16 +74,16 @@ class InlineMermaidPreprocessor(markdown.preprocessors.Preprocessor):
                             stdin=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             stdout=subprocess.PIPE)
-                        proc.stdin.write(content.encode('utf-8'))
 
-                        output, err = proc.communicate()
+                        stdout, stderr = proc.communicate(input=content.encode('utf-8'))
 
-                        if not os.path.isfile(filepath):
+                        if not os.path.isfile(path):
                             return (
                                 '<pre>Error : Image not created</pre>'
                                 '<pre>Args : ' + str(args) + '</pre>'
-                                '<pre>' + output.decode('utf-8') + '</pre>'
-                                '<pre>' + content + '</pre>').split('\n')
+                                '<pre>stdout : ' + stdout.decode('utf-8') + '</pre>'
+                                '<pre>stderr : ' + stderr.decode('utf-8') + '</pre>'
+                                '<pre>graph code : ' + content + '</pre>').split('\n')
 
                         with open(path, 'rb') as f:
                             encodedImageContent = base64.b64encode(f.read()).decode('utf-8')
