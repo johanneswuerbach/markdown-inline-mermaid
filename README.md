@@ -24,17 +24,19 @@ markdown_extensions:
     - markdown_inline_mermaid
 ```
 
-To use it in your Markdown doc:
+Afterwards you can use it in your Markdown doc:
 
+~~~
 ```mermaid
 graph TD
 A[Client] --> B[Load Balancer]
 ```
+~~~
 
 # Credits
 
 Heavily inspired by [github.com/cesaremorel/markdown-inline-graphviz](https://github.com/cesaremorel/markdown-inline-graphviz),
-which renders provides this functionality for graphviz.
+which provides this functionality for graphviz.
 
 
 # License
