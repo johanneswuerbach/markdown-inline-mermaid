@@ -78,6 +78,13 @@ class InlineMermaidPreprocessor(markdown.preprocessors.Preprocessor):
 
                         output, err = proc.communicate()
 
+                        if not os.path.isfile(filepath):
+                            return (
+                                '<pre>Error : Image not created</pre>'
+                                '<pre>Args : ' + str(args) + '</pre>'
+                                '<pre>' + output.decode('utf-8') + '</pre>'
+                                '<pre>' + content + '</pre>').split('\n')
+
                         with open(path, 'rb') as f:
                             encodedImageContent = base64.b64encode(f.read()).decode('utf-8')
                             img = '<img src=\'data:image/svg+xml;base64,%s\'>' % encodedImageContent
@@ -86,9 +93,9 @@ class InlineMermaidPreprocessor(markdown.preprocessors.Preprocessor):
                                 text[:m.start()], self.md.htmlStash.store(img), text[m.end():])
 
                     except Exception as e:
-                            err = str(e) + ' : ' + str(args)
                             return (
-                                '<pre>Error : ' + err + '</pre>'
+                                '<pre>Error : ' + str(e) + '</pre>'
+                                '<pre>Args : ' + str(args) + '</pre>'
                                 '<pre>' + content + '</pre>').split('\n')
 
             else:
