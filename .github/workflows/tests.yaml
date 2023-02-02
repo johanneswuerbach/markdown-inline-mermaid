@@ -1,0 +1,20 @@
+name: Tests
+on:
+  pull_request
+
+jobs:
+  test-python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.7', '3.11']  # Supported versions (min and max)
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: npm install -g @mermaid-js/mermaid-cli
+      - run: pip install -r requirements_test.txt
+      - run: pip install .
+      - run: pytest -v
