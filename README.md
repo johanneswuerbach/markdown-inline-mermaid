@@ -33,6 +33,15 @@ A[Client] --> B[Load Balancer]
 ```
 ~~~
 
+
+# Development
+
+You can run the tests locally inside docker using:
+
+```
+make test
+```
+
 # Credits
 
 Heavily inspired by [github.com/cesaremorel/markdown-inline-graphviz](https://github.com/cesaremorel/markdown-inline-graphviz),
