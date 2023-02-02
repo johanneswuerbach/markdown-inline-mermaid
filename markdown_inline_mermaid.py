@@ -3,7 +3,7 @@ Mermaid extensions for Markdown.
 Renders the output inline, eliminating the need to configure an output
 directory.
 
-Supports outputs types of SVG and PNG. The output will be taken from the
+Supports output types of SVG and PNG. The output will be taken from the
 filename specified in the tag. Example:
 
 ```mermaid
@@ -17,91 +17,92 @@ Inspired by cesaremorel/markdown-inline-graphviz (http://github.com/cesaremorel/
 """
 
 import re
-import markdown
 import tempfile
-import os.path
 import subprocess
 import base64
+from pathlib import Path
 
+from markdown import Extension
+from markdown.preprocessors import Preprocessor
 
 # Global vars
 BLOCK_RE = re.compile(
-    r'^```mermaid\s*\n(?P<content>.*?)```\s*$',
-    re.MULTILINE | re.DOTALL)
+    r"^```mermaid\s*\n(?P<content>.*?)```\s*$", re.MULTILINE | re.DOTALL
+)
 
-puppeteerConfigContent = """{
+puppeteer_config_content = """{
   "args": ["--no-sandbox"]
 }
 """
 
-class InlineMermaidExtension(markdown.Extension):
 
-    def extendMarkdown(self, md, md_globals):
-        """ Add InlineMermaidPreprocessor to the Markdown instance. """
+class InlineMermaidExtension(Extension):
+    def extendMarkdown(self, md):
+        """Add InlineMermaidPreprocessor to the Markdown instance."""
         md.registerExtension(self)
-
-        md.preprocessors.add('mermaid_block',
-                             InlineMermaidPreprocessor(md),
-                             ">normalize_whitespace")
+        md.preprocessors.register(InlineMermaidPreprocessor(md), "mermaid_block", 27)
 
 
-class InlineMermaidPreprocessor(markdown.preprocessors.Preprocessor):
-
-    def __init__(self, md):
-        super(InlineMermaidPreprocessor, self).__init__(md)
-
+class InlineMermaidPreprocessor(Preprocessor):
     def run(self, lines):
-        """ Match and generate mermaid code blocks."""
+        """Match and generate mermaid code blocks."""
 
         text = "\n".join(lines)
         while 1:
             m = BLOCK_RE.search(text)
             if m:
-                content = m.group('content')
+                content = m.group("content")
 
                 with tempfile.TemporaryDirectory() as tmp:
-                    path = os.path.join(tmp, 'out.svg')
+                    tmp_dir = Path(tmp)
+                    tmp_svg_path = tmp_dir / "out.svg"
 
-                    puppeteerConfig = os.path.join(tmp, 'puppeteer-config.json')
-                    with open(puppeteerConfig, 'w') as f:
-                        f.write(puppeteerConfigContent)
+                    puppeteer_config = tmp_dir / "puppeteer-config.json"
+                    with puppeteer_config.open("w") as f:
+                        f.write(puppeteer_config_content)
 
-                    args = ['mmdc', '-p', puppeteerConfig, '-o', path]
+                    args = ["mmdc", "-p", str(puppeteer_config), "-o", str(tmp_svg_path)]
 
                     try:
-                        proc = subprocess.Popen(
+                        res = subprocess.run(
                             args,
-                            stdin=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            stdout=subprocess.PIPE)
+                            input=content,
+                            capture_output=True,
+                            text=True,
+                        )
 
-                        stdout, stderr = proc.communicate(input=content.encode('utf-8'))
-
-                        if not os.path.isfile(path):
+                        if not tmp_svg_path.is_file():
                             return (
-                                '<pre>Error : Image not created</pre>'
-                                '<pre>Args : ' + str(args) + '</pre>'
-                                '<pre>stdout : ' + stdout.decode('utf-8') + '</pre>'
-                                '<pre>stderr : ' + stderr.decode('utf-8') + '</pre>'
-                                '<pre>graph code : ' + content + '</pre>').split('\n')
+                                "<pre>Error : Image not created</pre>"
+                                "<pre>Args : " + str(args) + "</pre>"
+                                "<pre>stdout : " + res.stdout + "</pre>"
+                                "<pre>stderr : " + res.stderr + "</pre>"
+                                "<pre>graph code : " + content + "</pre>"
+                            ).split("\n")
 
-                        with open(path, 'rb') as f:
-                            encodedImageContent = base64.b64encode(f.read()).decode('utf-8')
-                            img = '<img src=\'data:image/svg+xml;base64,%s\'>' % encodedImageContent
+                        with tmp_svg_path.open("rb") as f:
+                            encoded_image_content = base64.b64encode(f.read()).decode(
+                                "utf-8"
+                            )
+                            img = f'<img src="data:image/svg+xml;base64,{encoded_image_content}">'
 
-                            text = '%s\n%s\n%s' % (
-                                text[:m.start()], self.md.htmlStash.store(img), text[m.end():])
+                            text = "{}\n{}\n{}".format(
+                                text[: m.start()],
+                                self.md.htmlStash.store(img),
+                                text[m.end() :],
+                            )
 
                     except Exception as e:
-                            return (
-                                '<pre>Error : ' + str(e) + '</pre>'
-                                '<pre>Args : ' + str(args) + '</pre>'
-                                '<pre>' + content + '</pre>').split('\n')
+                        return (
+                            "<pre>Error : " + str(e) + "</pre>"
+                            "<pre>Args : " + str(args) + "</pre>"
+                            "<pre>" + content + "</pre>"
+                        ).split("\n")
 
             else:
                 break
         return text.split("\n")
 
 
-def makeExtension(*args, **kwargs):
-    return InlineMermaidExtension(*args, **kwargs)
+def makeExtension(**kwargs):
+    return InlineMermaidExtension(**kwargs)

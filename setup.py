@@ -2,9 +2,9 @@ import os
 import sys
 from setuptools import setup
 
-VERSION = '1.0.2'
+VERSION = "1.0.2"
 
-if sys.argv[-1] == 'publish':
+if sys.argv[-1] == "publish":
     if os.system("pip freeze | grep wheel"):
         print("wheel not installed.\nUse `pip install wheel`.\nExiting.")
         sys.exit()
@@ -22,7 +22,7 @@ setup(
     name="markdown-inline-mermaid",
     version=VERSION,
     py_modules=["markdown_inline_mermaid"],
-    install_requires=['Markdown>=2.3.1'],
+    install_requires=["Markdown>=2.3.1"],
     author="Johannes Wuerbach",
     author_email="johannes.wuerbach@googlemail.com",
     description="Render inline graphs with Markdown and Mermaid",
@@ -30,16 +30,16 @@ setup(
     license="MIT",
     url="https://github.com/johanneswuerbach/markdown-inline-mermaid",
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Intended Audience :: Developers',
-        'Topic :: Documentation',
-        'Topic :: Text Processing',
-        'License :: OSI Approved :: MIT License',
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "Topic :: Documentation",
+        "Topic :: Text Processing",
+        "License :: OSI Approved :: MIT License",
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
     ],
 )
