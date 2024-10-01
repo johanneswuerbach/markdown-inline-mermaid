@@ -31,7 +31,7 @@ BLOCK_RE = re.compile(
 )
 
 puppeteer_config_content = """{
-  "args": ["--no-sandbox"]
+  "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"]
 }
 """
 
